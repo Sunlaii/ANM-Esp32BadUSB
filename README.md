@@ -35,11 +35,7 @@ Trước khi bắt đầu, bạn cần chuẩn bị:
 -   **Build**: Nhấn vào biểu tượng dấu tick (✓) để biên dịch mã nguồn.
 -   **Upload**: Kết nối mạch LOLIN S2 Mini với máy tính qua cổng USB. Sau đó, nhấn vào biểu tượng mũi tên (→) để nạp chương trình vào mạch.
 
-**Lưu ý quan trọng**: Để có thể nạp code, bạn cần đưa mạch về chế độ **Bootloader**. Hãy làm theo các bước sau:
-1.  Nhấn và giữ nút `0`.
-2.  Nhấn rồi thả nút `RST`.
-3.  Thả nút `0`.
-4.  Sau đó tiến hành Upload từ PlatformIO.
+
 
 ## Thông tin phần cứng
 Dự án này được phát triển và thử nghiệm trên mạch **WEMOS LOLIN S2 Mini**.
