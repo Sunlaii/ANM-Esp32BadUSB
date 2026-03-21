@@ -1,0 +1,7 @@
+Các chức năng sẽ gửi thông tin về server discord cá nhân Khang(Dùng discord webhook/bot discord)
+
+Thay đổi để gửi về discord khác bằng cách đổi trường $dc trong từng file .ps1
+
+Đường dẫn các file .ps1 mà code gọi để và xóa tự động
+https://github.com/khangpdm/BadUSB
+
