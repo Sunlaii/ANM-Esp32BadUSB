@@ -97,21 +97,7 @@ try {
     $client.PostAsync($uri, $content).Wait()
 } catch {}
 
-# ===============================================================================
-# [THÊM MỚI] GỬI TÍN HIỆU "DONE" QUA CỔNG COM ĐỂ ESP32 NHÁY ĐÈN
-# ===============================================================================
-try {
-    # Quét tất cả các cổng COM đang cắm trên máy tính
-    $ports = [System.IO.Ports.SerialPort]::GetPortNames()
-    foreach ($p in $ports) {
-        # Bắn chữ DONE vào cổng với tốc độ 115200 (khớp với ESP32)
-        $port = New-Object System.IO.Ports.SerialPort $p, 115200, None, 8, One
-        $port.Open()
-        $port.WriteLine("DONE")
-        $port.Close()
-    }
-} catch {}
-# ===============================================================================
+
 
 # Cleanup
 $fileStream.Close()
