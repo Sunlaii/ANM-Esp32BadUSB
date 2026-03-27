@@ -122,7 +122,16 @@ try {
 # # Clear command history
 # Clear-Content (Get-PSReadlineOption).HistorySavePath
 
-# exit
+# Xóa lịch sử các lệnh PowerShell đã gõ
+Clear-Content (Get-PSReadlineOption).HistorySavePath -ErrorAction SilentlyContinue
+
+# ===============================================================================
+# LÀM SẠCH LỊCH SỬ HỘP THOẠI RUN (WIN + R)
+# ===============================================================================
+try {
+    $regPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\RunMRU"
+    Remove-ItemProperty -Path $regPath -Name "*" -ErrorAction SilentlyContinue
+} catch {}
 
 # ===============================================================================
 # LỆNH DỌN DẸP SẠCH DẤU VẾT (AN TOÀN)
