@@ -5,7 +5,7 @@
 #  \__, |\___/ \__,_(_)_|\_\_| |_|\___/ \_/\_/  
 #  |___/                                        
 
-$basePath = "C:\Users\Public\Documents\scripts"
+$basePath = "C:\Users\$env:USERNAME\Downloads"
 $dumpFolder = "$basePath\$env:USERNAME-$(get-date -f yyyy-MM-dd)"
 $dumpFile = "$dumpFolder.zip"
 
@@ -122,8 +122,8 @@ Set-Location C:\Users\Public\Documents
 # ===============================================================================
 # [CHỈNH SỬA] ĐÃ VÔ HIỆU HÓA LỆNH XÓA ĐỂ GIỮ LẠI FILE TRONG CÙNG THƯ MỤC
 # ===============================================================================
-Remove-Item -Recurse -Force scripts
-Remove-MpPreference -ExclusionPath "C:\Users\Public\Documents\scripts" -Force
+# Remove-Item -Recurse -Force scripts
+# Remove-MpPreference -ExclusionPath "C:\Users\Public\Public Documents\scripts" -Force
 # ===============================================================================
 
 # Caps Lock signal
