@@ -98,6 +98,13 @@ void loop() {
       Keyboard.press(KEY_CAPS_LOCK); delay(50); Keyboard.releaseAll();
       delay(250); 
     }
+    //nháy liên tục đèn trên esp
+    while(true) {
+      digitalWrite(ledPin, HIGH);
+      delay(250);
+      digitalWrite(ledPin, LOW);
+      delay(250);
+    }
 
     Serial.println("[LOG] === HOÀN TẤT CUỘC TẤN CÔNG ===");
     Serial.println("[LOG] Bạn có thể rút USB ra ngay bây giờ.");
