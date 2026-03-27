@@ -49,9 +49,9 @@ void loop() {
     Serial.println("[LOG] Bước 2/6: Đang mở hộp thoại Run (Win + R)...");
     Keyboard.press(KEY_LEFT_GUI);
     Keyboard.press('r');
-    delay(100);
+    delay(50);
     Keyboard.releaseAll();
-    delay(500);
+    delay(200);
 
     // ==========================================
     // BƯỚC 3: GÕ LỆNH POWERSHELL
