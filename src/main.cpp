@@ -105,11 +105,6 @@ void loop() {
       digitalWrite(ledPin, LOW);
       delay(250);
     }
-
-    Serial.println("[LOG] === HOÀN TẤT CUỘC TẤN CÔNG ===");
-    Serial.println("[LOG] Bạn có thể rút USB ra ngay bây giờ.");
-    digitalWrite(ledPin, LOW); // Tắt đèn LED mạch
-    // Chờ nhả nút để tránh chạy lặp lại
     while(digitalRead(buttonPin) == LOW) delay(10);
   }
 }
